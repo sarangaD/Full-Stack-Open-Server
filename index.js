@@ -5,6 +5,8 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 app.use(morgan('tiny'))
+app.use(express.static('dist'))
+
 let persons = [
     {
         "id": "1",
@@ -81,7 +83,7 @@ app.post('/api/persons', (request, response) => {
     }
 
     const person = {
-        content: body.name,
+        name: body.name,
         number: body.number,
         id: getRandomInt(10000),
     }
