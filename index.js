@@ -1,51 +1,110 @@
 const express = require('express')
+const morgan = require('morgan')
+const cors = require('cors')
 const app = express()
-
-let notes = [
+app.use(express.json())
+app.use(cors())
+app.use(morgan('tiny'))
+let persons = [
     {
-      id: "1",
-      content: "HTML is easy",
-      important: true
+        "id": "1",
+        "name": "Arto Hellas",
+        "number": "040-123456"
     },
     {
-      id: "2",
-      content: "Browser can execute only JavaScript",
-      important: false
+        "id": "2",
+        "name": "Ada Lovelace",
+        "number": "39-44-5323523"
     },
     {
-      id: "3",
-      content: "GET and POST are the most important methods of HTTP protocol",
-      important: true
+        "id": "3",
+        "name": "Dan Abramov",
+        "number": "12-43-234345"
+    },
+    {
+        "id": "4",
+        "name": "Mary Poppendieck",
+        "number": "39-23-6423122"
     }
-  ]
+]
+const date = new Date();
 
-  
-  app.get('/', (request, response) => {
-    response.send('<h1>Hello World..!</h1>')
-  })
-  
-  app.get('/api/notes', (request, response) => {
-    response.json(notes)
-  })
-  
-  app.get('/api/notes/:id', (request, response) => {
+
+morgan.token('post-data', (req) => {
+    return req.method === 'POST' ? JSON.stringify(req.body) : '';
+  });
+  const customFormat = ':method :url :status :response-time ms - :post-data';
+
+  app.use(
+    morgan(customFormat, {
+      skip: (req) => req.method !== 'POST', // Log only POST requests
+    })
+  );
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.get('/api/info', (request, response) => {
+    response.send(`<h3>Phonebook has info for ${persons.length} people </h3> <br>
+        <h3>
+        ${date}
+        </h3>`)
+})
+
+app.get('/api/persons', (request, response) => {
+    response.json(persons)
+})
+
+app.get('/api/persons/:id', (request, response) => {
     const id = request.params.id
-    const note = notes.find(note => note.id === id)
-    if (note) {
-        response.json(note)
-      } else {
+    const person = persons.find(person => person.id === id)
+    if (person) {
+        response.json(person)
+    } else {
         response.status(404).end()
-      }
-  })
+    }
+})
 
-  app.delete('/api/notes/:id', (request, response) => {
+app.post('/api/persons', (request, response) => {
+    const body = request.body;
+    if (!body.name) {
+        return response.status(400).json({
+            error: 'name missing'
+        })
+    }
+
+    if (persons.filter(x => x.name === body.name).length > 0) {
+        return response.status(400).json({
+            error: 'name must be unique'
+        })
+    }
+
+    const person = {
+        content: body.name,
+        number: body.number,
+        id: getRandomInt(10000),
+    }
+    persons.concat(person);
+    response.json(person)
+})
+
+app.delete('/api/persons/:id', (request, response) => {
     const id = request.params.id
-    notes = notes.filter(note => note.id !== id)
-  
-    response.status(204).end()
-  })
+    persons = persons.filter(person => person.id !== id)
 
-  const PORT = 3001
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-  })
+    response.status(204).end()
+})
+app.use(unknownEndpoint)
+
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
+
+

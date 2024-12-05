@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/sarangaD/Full-Stack-Open-Server#readme",
   "dependencies": {
-    "express": "^4.21.1"
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
