@@ -1,6 +1,8 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 app.use(express.json())
+app.use(morgan('tiny'))
 
 let persons = [
     {
@@ -26,6 +28,17 @@ let persons = [
 ]
 
 const date = new Date();
+
+morgan.token('post-data', (req) => {
+    return req.method === 'POST' ? JSON.stringify(req.body) : '';
+  });
+  const customFormat = ':method :url :status :response-time ms - :post-data';
+
+  app.use(
+    morgan(customFormat, {
+      skip: (req) => req.method !== 'POST', // Log only POST requests
+    })
+  );
 
 app.get('/info', (request, response) => {
     response.send(`<h3>Phonebook has info for ${persons.length} people </h3> <br>
