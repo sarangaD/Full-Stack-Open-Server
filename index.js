@@ -56,7 +56,7 @@ app.post('/api/persons', (request, response) => {
         number: body.number,
         id: getRandomInt(10000),
     }
-    persons.concat(person);
+    persons = [...persons,person];
     response.json(person)
 })
 
