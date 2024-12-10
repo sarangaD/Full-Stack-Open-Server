@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+app.use(express.json())
 
 let persons = [
     {
@@ -47,6 +48,18 @@ app.get('/api/persons/:id', (request, response) => {
     }
 })
 
+app.post('/api/persons', (request, response) => {
+    const body = request.body;
+
+    const person = {
+        name: body.name,
+        number: body.number,
+        id: getRandomInt(10000),
+    }
+    persons.concat(person);
+    response.json(person)
+})
+
 app.delete('/api/persons/:id', (request, response) => {
     const id = request.params.id
     persons = persons.filter(person => person.id !== id)
@@ -59,4 +72,6 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
 
-
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
