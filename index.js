@@ -24,8 +24,9 @@ let persons = [
     }
 ]
 
+const date = new Date();
 
-app.get('/api/info', (request, response) => {
+app.get('/info', (request, response) => {
     response.send(`<h3>Phonebook has info for ${persons.length} people </h3> <br>
         <h3>
         ${date}
@@ -38,7 +39,7 @@ app.get('/api/persons', (request, response) => {
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on port ${PORT}`)
 })
 
 
