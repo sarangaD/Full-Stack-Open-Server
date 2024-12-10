@@ -1,36 +1,21 @@
+require('dotenv').config()
+const person = require('./models/person')
+
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const mongoose = require('mongoose')
 const app = express()
 app.use(express.json())
 app.use(cors())
 app.use(morgan('tiny'))
 app.use(express.static('dist'))
 
-let persons = [
-    {
-        "id": "1",
-        "name": "Arto Hellas",
-        "number": "040-123456"
-    },
-    {
-        "id": "2",
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523"
-    },
-    {
-        "id": "3",
-        "name": "Dan Abramov",
-        "number": "12-43-234345"
-    },
-    {
-        "id": "4",
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122"
-    }
-]
+let persons = [];
 
 const date = new Date();
+
+const Person = mongoose.model('Person', person.personSchema)
 
 morgan.token('post-data', (req) => {
     return req.method === 'POST' ? JSON.stringify(req.body) : '';
@@ -51,17 +36,25 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
-})
+    Person.find({}).then(persons => {
+      this.persons = persons;
+      response.json(persons);
+    })
+  })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    const person = persons.find(person => person.id === id)
-    if (person) {
-        response.json(person)
-    } else {
-        response.status(404).end()
-    }
+
+app.get('/api/persons/:id',async (request, response) => {
+    const id = Number(request.params.id)
+    
+    Person.find({}).then(persons => {
+        const person = persons.find(x=>x.id===id);
+        if (person) {
+            response.json(person);
+          } else {
+            response.status(404).json({ error: 'Person not found' });
+          }
+      })
+
 })
 
 app.post('/api/persons', (request, response) => {
@@ -77,20 +70,29 @@ app.post('/api/persons', (request, response) => {
             error: 'name must be unique'
         })
     }
-    const person = {
+    const person = new Person({
         name: body.name,
         number: body.number,
         id: getRandomInt(10000),
-    }
-    persons = [...persons,person];
-    response.json(person)
+    });
+
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+      })
+
+
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', async (request, response) => {
     const id = request.params.id
-    persons = persons.filter(person => person.id !== id)
-
-    response.status(204).end()
+    //persons = persons.filter(person => person.id !== id)
+    const result = await Person.deleteOne({"id":id});
+    if(result){
+        response.status(204).end()
+    }else{
+        response.status(404).json({ error: 'Person not found' }); // Not Found
+    }
+   
 })
 
 const PORT = process.env.PORT || 3001
