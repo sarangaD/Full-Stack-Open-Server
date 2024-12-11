@@ -28,22 +28,22 @@ const unknownEndpoint = (request, response) => {
 }
 
 
-let persons = [];
+let persons = []
 
-const date = new Date();
+const date = new Date()
 
 const Person = mongoose.model('Person', person.personSchema)
 
 morgan.token('post-data', (req) => {
-    return req.method === 'POST' ? JSON.stringify(req.body) : '';
-});
-const customFormat = ':method :url :status :response-time ms - :post-data';
+    return req.method === 'POST' ? JSON.stringify(req.body) : ''
+})
+const customFormat = ':method :url :status :response-time ms - :post-data'
 
 app.use(
     morgan(customFormat, {
         skip: (req) => req.method !== 'POST', // Log only POST requests
     })
-);
+)
 
 app.get('/info', (request, response) => {
     response.send(`<h3>Phonebook has info for ${persons.length} people </h3> <br>
@@ -54,8 +54,8 @@ app.get('/info', (request, response) => {
 
 app.get('/api/persons', (request, response) => {
     Person.find({}).then(persons => {
-        this.persons = persons;
-        response.json(persons);
+        this.persons = persons
+        response.json(persons)
     })
 })
 
@@ -73,7 +73,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 })
 
 app.post('/api/persons', (request, response, next) => {
-    const body = request.body;
+    const body = request.body
     if (!body.name || !body.number) {
         return response.status(400).json({
             error: 'The name or number is missing'
@@ -89,7 +89,7 @@ app.post('/api/persons', (request, response, next) => {
         name: body.name,
         number: body.number,
         id: getRandomInt(10000),
-    });
+    })
 
     person.save().then(savedPerson => {
         response.json(savedPerson)
@@ -102,7 +102,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     const person = {
         name: name,
         number: number
-    };
+    }
 
     Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
         .then(updatedPerson => {
@@ -113,7 +113,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndDelete(request.params.id)
-        .then(result => {
+        .then(() => {
             response.status(204).end()
         }).catch(error => next(error))
 })
@@ -127,5 +127,5 @@ app.listen(PORT, () => {
 })
 
 function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
+    return Math.floor(Math.random() * max)
 }
