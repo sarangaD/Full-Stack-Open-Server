@@ -10,8 +10,6 @@ const password = encodeURIComponent(process.argv[3]);
 const url =
   `mongodb+srv://${username}:${password}@cluster0.ypco2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
-console.log(url);
-
 mongoose.set('strictQuery', false)
 
 mongoose.connect(url)
