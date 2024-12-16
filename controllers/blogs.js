@@ -46,6 +46,33 @@ blogsRouter.post('/', async (request, response) => {
     })
 })
 
+blogsRouter.put('/:id', async (request, response) => {
+  const { title, author, url, likes } = new Blog(request.body)
+
+  if (!title) {
+    return response.status(400).json({
+      error: 'The title is missing'
+    })
+  }
+
+  if (!url) {
+    return response.status(400).json({
+      error: 'The url is missing'
+    })
+  }
+
+  const blog = {
+    title: title,
+    author: author,
+    url: url,
+    likes: likes
+  }
+
+  await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
+    .then(updatedBlog => {
+      response.json(updatedBlog)
+    })
+})
 
 blogsRouter.delete('/:id', (request, response) => {
   Blog.findByIdAndDelete(request.params.id)
